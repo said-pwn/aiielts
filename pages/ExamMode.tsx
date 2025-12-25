@@ -31,6 +31,7 @@ const ExamMode: React.FC = () => {
 
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [isGeneratingTopic, setIsGeneratingTopic] = useState(false);
+  const [tempGeneratedTopic, setTempGeneratedTopic] = useState<string | null>(null);
   const [isBrainstorming, setIsBrainstorming] = useState(false);
   const [brainstormResult, setBrainstormResult] = useState<{ ideas: string[], vocab: string[], structure: string[] } | null>(null);
   const [showLengthWarning, setShowLengthWarning] = useState(false);
@@ -65,11 +66,18 @@ const ExamMode: React.FC = () => {
     setError(null);
     try {
       const newPrompt = await generateWritingTopic(taskType);
-      setPrompt(newPrompt);
+      setTempGeneratedTopic(newPrompt);
     } catch (err: any) {
       setError(t('error_generic'));
     } finally {
       setIsGeneratingTopic(false);
+    }
+  };
+
+  const confirmNewTopic = () => {
+    if (tempGeneratedTopic) {
+      setPrompt(tempGeneratedTopic);
+      setTempGeneratedTopic(null);
     }
   };
 
@@ -134,33 +142,33 @@ const ExamMode: React.FC = () => {
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-12 animate-fadeIn pb-40">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-12 animate-fadeIn pb-40 relative">
       
-      {/* MOBILE ACTION BAR */}
-      <div className={`lg:hidden fixed bottom-24 inset-x-4 z-[9999] transition-all duration-500 ${ (isTimerRunning || essay.length > 0) ? 'translate-y-0 opacity-100' : 'translate-y-32 opacity-0 pointer-events-none'}`}>
-        <div className="bg-brand-black/95 dark:bg-black/95 backdrop-blur-3xl border border-white/10 rounded-3xl p-3 flex items-center justify-between shadow-2xl">
-          <div className="flex items-center gap-4 px-2">
-             <div className="flex flex-col">
-                <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Time</span>
-                <span className={`text-base font-black tabular-nums ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-brand-primary'}`}>{formatTime(timeLeft)}</span>
-             </div>
-             <div className="w-px h-6 bg-white/10"></div>
-             <div className="flex flex-col">
-                <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Words</span>
-                <span className={`text-base font-black tabular-nums ${isUnderLength ? 'text-rose-500' : 'text-white'}`}>{wordCount}</span>
-             </div>
-          </div>
-          <button onClick={handleFinishAttempt} disabled={isEvaluating} className="px-5 py-3.5 bg-brand-primary text-brand-dark rounded-2xl font-black text-[9px] uppercase tracking-widest active:scale-95 disabled:opacity-50">
-            {isEvaluating ? <i className="fas fa-spinner fa-spin"></i> : t('finish_protocol')}
-          </button>
-        </div>
-      </div>
-
       <div className="mb-8 md:mb-16">
         <h1 className="text-4xl md:text-8xl font-black text-brand-dark dark:text-white mb-2 tracking-tighter uppercase leading-tight">{t('nav_exam')}</h1>
         <div className="flex items-center gap-3">
            <div className="w-8 h-px bg-brand-primary"></div>
            <span className="text-[8px] md:text-[10px] font-bold uppercase text-slate-400 tracking-widest">Active Simulation Node</span>
+        </div>
+      </div>
+
+      {/* MOBILE ACTION BAR - Changed to sticky to avoid covering the title initially */}
+      <div className={`lg:hidden sticky top-20 z-[50] mb-6 transition-all duration-500 transform ${ (isTimerRunning || essay.length > 0) ? 'translate-y-0 opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/5 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between shadow-xl">
+          <div className="flex items-center gap-4">
+             <div className="flex flex-col">
+                <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Time</span>
+                <span className={`text-sm font-black tabular-nums ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-brand-primary'}`}>{formatTime(timeLeft)}</span>
+             </div>
+             <div className="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
+             <div className="flex flex-col">
+                <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Words</span>
+                <span className={`text-sm font-black tabular-nums ${isUnderLength ? 'text-rose-500' : 'text-brand-dark dark:text-white'}`}>{wordCount}</span>
+             </div>
+          </div>
+          <button onClick={handleFinishAttempt} disabled={isEvaluating} className="px-4 py-2 bg-brand-primary text-brand-dark rounded-xl font-black text-[8px] uppercase tracking-widest active:scale-95 disabled:opacity-50 shadow-md">
+            {isEvaluating ? <i className="fas fa-spinner fa-spin"></i> : t('finish_protocol')}
+          </button>
         </div>
       </div>
 
@@ -240,6 +248,7 @@ const ExamMode: React.FC = () => {
         </aside>
       </div>
 
+      {/* BRAINSTORM MODAL */}
       <Modal isOpen={!!brainstormResult} onClose={() => setBrainstormResult(null)} title={t('brainstorm_title')}>
         {brainstormResult && (
           <div className="space-y-8 animate-fadeIn">
@@ -277,6 +286,30 @@ const ExamMode: React.FC = () => {
         )}
       </Modal>
 
+      {/* NEURAL PROMPT MODAL */}
+      <Modal 
+        isOpen={!!tempGeneratedTopic} 
+        onClose={() => setTempGeneratedTopic(null)} 
+        title={t('protocol_discovery') || "Neural Topic Discovery"}
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+             <button onClick={handleGenerateTopicRequest} disabled={isGeneratingTopic} className="py-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary">
+                {isGeneratingTopic ? <i className="fas fa-spinner fa-spin"></i> : "Regenerate"}
+             </button>
+             <button onClick={confirmNewTopic} className="py-4 bg-brand-primary text-brand-dark rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl">
+                {t('accept_node') || "Accept Topic"}
+             </button>
+          </div>
+        }
+      >
+        <div className="p-6 md:p-10 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-[2rem] border border-emerald-100/50 dark:border-emerald-800/20">
+           <p className="text-base md:text-xl font-bold text-brand-dark dark:text-white leading-relaxed italic">
+             {tempGeneratedTopic}
+           </p>
+        </div>
+      </Modal>
+
+      {/* LENGTH WARNING MODAL */}
       <Modal isOpen={showLengthWarning} onClose={() => setShowLengthWarning(false)} title={t('warning_length')} footer={<button onClick={executeSubmit} className="w-full py-4 bg-rose-500 text-white rounded-xl font-black text-[10px] uppercase">Proceed Anyway</button>}>
         <p className="font-bold text-slate-500 dark:text-slate-300 leading-relaxed text-sm">{t('warning_length_desc')}</p>
       </Modal>
