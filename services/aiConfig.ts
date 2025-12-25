@@ -3,16 +3,14 @@ import { GoogleGenAI } from "@google/genai";
 
 /**
  * Инициализация клиента Gemini.
- * Переменная process.env.API_KEY должна быть настроена в Dashboard Vercel.
+ * ВАЖНО: На Vercel вы должны добавить API_KEY в Settings -> Environment Variables.
  */
 export const getAIClient = () => {
   const apiKey = process.env.API_KEY;
   
-  if (!apiKey || apiKey === "undefined") {
-    // Этот лог поможет вам понять, что Vercel не видит переменную.
-    // Проверьте настройки проекта на Vercel (Project Settings -> Environment Variables).
-    console.error("CRITICAL: AI API Key (process.env.API_KEY) is missing. Check Vercel project settings.");
+  if (!apiKey || apiKey === "undefined" || apiKey.length < 5) {
+    throw new Error("API Key is missing. Please set 'API_KEY' in your Vercel Project Settings (Environment Variables).");
   }
   
-  return new GoogleGenAI({ apiKey: apiKey || "" });
+  return new GoogleGenAI({ apiKey });
 };
