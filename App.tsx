@@ -9,6 +9,7 @@ import ResultsPage from './pages/ResultsPage';
 import FAQPage from './pages/FAQPage';
 import ContactPage from './pages/ContactPage';
 import { LanguageProvider } from './context/LanguageContext';
+import { Analytics } from "@vercel/analytics/next"
 
 const App: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const App: React.FC = () => {
         </Layout>
       </HashRouter>
     </LanguageProvider>
+    
   );
 };
 

@@ -67,7 +67,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       await window.aistudio.openSelectKey();
       setHasKey(true);
     } else {
-      alert("Neural Link can only be managed via AI Studio or Environment Variables (Vercel).");
+      alert("error");
     }
   };
 

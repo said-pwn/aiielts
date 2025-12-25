@@ -35,5 +35,24 @@
         "Внедрена голосовая обратная связь"
       ]
     }
+    
+  },
+  {
+    "version": "v2.5.1",
+    "date": "24.12.2025",
+    "isLatest": false,
+    "changes": {
+      "en": [
+        "Initial release of Neural Examiner",
+        "Added Exam Simulation mode",
+        "Implemented Voice Feedback"
+      ],
+      "ru": [
+        "Первый релиз Нейронного Экзаменатора",
+        "Добавлен режим симуляции экзамена",
+        "Внедрена голосовая обратная связь"
+      ]
+    }
+    
   }
 ]
