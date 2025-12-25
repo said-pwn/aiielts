@@ -65,7 +65,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav_home': 'Главная',
     'nav_exam': 'Экзамен',
     'nav_marker': 'Оценка',
-    'hero_title_1': 'ПОВЕРЬТЕ',
+    'hero_title_1': 'ПРОВЕРЬТЕ',
     'hero_title_2': 'ВАШ',
     'hero_title_3': 'IELTS WRITING УРОВЕНЬ',
     'hero_subtitle': 'Наш сервис поможет вам улучшить ваш IELTS writing.',
