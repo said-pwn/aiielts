@@ -1,5 +1,8 @@
-
 {
-  "name": "IELTS Writing AI Grader",
-  "description": "A professional AI-powered tool for grading IELTS Writing Task 1 and Task 2 submissions with detailed feedback based on official criteria."
+  "name": "IELTS Writing Examiner Pro",
+  "description": "An advanced AI-powered IELTS Writing assessment tool that provides realistic band scores, detailed analytical feedback, and AI audio insights.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
 }
