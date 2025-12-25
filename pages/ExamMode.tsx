@@ -68,7 +68,11 @@ const ExamMode: React.FC = () => {
       const newPrompt = await generateWritingTopic(taskType);
       setTempGeneratedTopic(newPrompt);
     } catch (err: any) {
-      setError(t('error_generic'));
+      if (err.message?.includes('429')) {
+        setError("API Quota Reached (20/20 requests). Google limits free users. Please wait a few minutes or try again later.");
+      } else {
+        setError(t('error_generic'));
+      }
     } finally {
       setIsGeneratingTopic(false);
     }
@@ -92,7 +96,11 @@ const ExamMode: React.FC = () => {
       const result = await brainstormIdeas(prompt, taskType);
       setBrainstormResult(result);
     } catch (err: any) {
-      setError(t('error_ai'));
+      if (err.message?.includes('429')) {
+        setError("AI Limit Reached. Free tier allows 20 requests/day.");
+      } else {
+        setError(t('error_ai'));
+      }
     } finally {
       setIsBrainstorming(false);
     }
@@ -122,7 +130,11 @@ const ExamMode: React.FC = () => {
     } catch (err: any) {
       console.error("Submit Error:", err);
       setIsTimerRunning(wasTimerRunning);
-      setError("AI Analysis is currently busy. Please try again in 15 seconds.");
+      if (err.message?.includes('429')) {
+        setError("QUOTA EXCEEDED: Your 20 daily AI evaluations are used up. Google requires a paid plan to continue. Please try again tomorrow.");
+      } else {
+        setError("AI Analysis is currently busy. Please try again in 15 seconds.");
+      }
     } finally {
       setIsEvaluating(false);
     }
@@ -144,6 +156,7 @@ const ExamMode: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-12 animate-fadeIn pb-40 relative">
       
+      {/* Title Section */}
       <div className="mb-8 md:mb-16">
         <h1 className="text-4xl md:text-8xl font-black text-brand-dark dark:text-white mb-2 tracking-tighter uppercase leading-tight">{t('nav_exam')}</h1>
         <div className="flex items-center gap-3">
@@ -152,30 +165,30 @@ const ExamMode: React.FC = () => {
         </div>
       </div>
 
-      {/* MOBILE ACTION BAR - Changed to sticky to avoid covering the title initially */}
-      <div className={`lg:hidden sticky top-20 z-[50] mb-6 transition-all duration-500 transform ${ (isTimerRunning || essay.length > 0) ? 'translate-y-0 opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
-        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/5 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between shadow-xl">
-          <div className="flex items-center gap-4">
+      {/* MOBILE ACTION BAR - Fixed to bottom instead of top to avoid title overlap entirely */}
+      <div className={`lg:hidden fixed bottom-24 left-4 right-4 z-[100] transition-all duration-500 transform ${ (isTimerRunning || essay.length > 0) ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/10 dark:border-white/10 rounded-3xl px-6 py-4 flex items-center justify-between shadow-2xl">
+          <div className="flex items-center gap-6">
              <div className="flex flex-col">
-                <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Time</span>
-                <span className={`text-sm font-black tabular-nums ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-brand-primary'}`}>{formatTime(timeLeft)}</span>
+                <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Time</span>
+                <span className={`text-base font-black tabular-nums ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-brand-primary'}`}>{formatTime(timeLeft)}</span>
              </div>
-             <div className="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
+             <div className="w-px h-8 bg-slate-200 dark:bg-white/10"></div>
              <div className="flex flex-col">
-                <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Words</span>
-                <span className={`text-sm font-black tabular-nums ${isUnderLength ? 'text-rose-500' : 'text-brand-dark dark:text-white'}`}>{wordCount}</span>
+                <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Words</span>
+                <span className={`text-base font-black tabular-nums ${isUnderLength ? 'text-rose-500' : 'text-brand-dark dark:text-white'}`}>{wordCount}</span>
              </div>
           </div>
-          <button onClick={handleFinishAttempt} disabled={isEvaluating} className="px-4 py-2 bg-brand-primary text-brand-dark rounded-xl font-black text-[8px] uppercase tracking-widest active:scale-95 disabled:opacity-50 shadow-md">
+          <button onClick={handleFinishAttempt} disabled={isEvaluating} className="px-6 py-3 bg-brand-primary text-brand-dark rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 disabled:opacity-50 shadow-lg">
             {isEvaluating ? <i className="fas fa-spinner fa-spin"></i> : t('finish_protocol')}
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-slideUp">
-          <i className="fas fa-exclamation-circle"></i>
-          {error}
+        <div className="mb-8 p-5 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-4 animate-slideUp">
+          <i className="fas fa-exclamation-circle text-lg"></i>
+          <span className="flex-1">{error}</span>
         </div>
       )}
 
@@ -293,16 +306,17 @@ const ExamMode: React.FC = () => {
         title={t('protocol_discovery') || "Neural Topic Discovery"}
         footer={
           <div className="grid grid-cols-2 gap-3">
-             <button onClick={handleGenerateTopicRequest} disabled={isGeneratingTopic} className="py-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary">
-                {isGeneratingTopic ? <i className="fas fa-spinner fa-spin"></i> : "Regenerate"}
+             <button onClick={handleGenerateTopicRequest} disabled={isGeneratingTopic} className="py-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary flex items-center justify-center gap-2 transition-all">
+                {isGeneratingTopic ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-sync"></i>}
+                {t('regenerate') || "Regenerate"}
              </button>
-             <button onClick={confirmNewTopic} className="py-4 bg-brand-primary text-brand-dark rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl">
+             <button onClick={confirmNewTopic} className="py-4 bg-brand-primary text-brand-dark rounded-xl font-black text-[9px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">
                 {t('accept_node') || "Accept Topic"}
              </button>
           </div>
         }
       >
-        <div className="p-6 md:p-10 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-[2rem] border border-emerald-100/50 dark:border-emerald-800/20">
+        <div className="p-6 md:p-10 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-[2rem] border border-emerald-100/50 dark:border-emerald-800/20 shadow-inner">
            <p className="text-base md:text-xl font-bold text-brand-dark dark:text-white leading-relaxed italic">
              {tempGeneratedTopic}
            </p>
