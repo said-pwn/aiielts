@@ -25,6 +25,7 @@ const App: React.FC = () => {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Analytics/>
         </Layout>
       </HashRouter>
     </LanguageProvider>

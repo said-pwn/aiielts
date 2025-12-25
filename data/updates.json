@@ -45,11 +45,11 @@
       "en": [
         "Initial release of Neural Examiner",
         "Added Exam Simulation mode",
-        "Implemented Voice Feedback"
+        "Implemented Voice Feedbac"
       ],
       "ru": [
         "Первый релиз Нейронного Экзаменатора",
-        "Добавлен режим симуляции экзамена",
+        "Добавлен  экзамена",
         "Внедрена голосовая обратная связь"
       ]
     }
