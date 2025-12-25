@@ -69,7 +69,7 @@ const ExamMode: React.FC = () => {
       setTempGeneratedTopic(newPrompt);
     } catch (err: any) {
       if (err.message?.includes('429')) {
-        setError("API Quota Reached (20/20 requests). Google limits free users. Please wait a few minutes or try again later.");
+        setError("API Quota Reached (20/20 requests). Please wait a few minutes or try again later.");
       } else {
         setError(t('error_generic'));
       }
@@ -131,7 +131,7 @@ const ExamMode: React.FC = () => {
       console.error("Submit Error:", err);
       setIsTimerRunning(wasTimerRunning);
       if (err.message?.includes('429')) {
-        setError("QUOTA EXCEEDED: Your 20 daily AI evaluations are used up. Google requires a paid plan to continue. Please try again tomorrow.");
+        setError("QUOTA EXCEEDED: Your 20 daily AI evaluations are used up. Please try again tomorrow.");
       } else {
         setError("AI Analysis is currently busy. Please try again in 15 seconds.");
       }
