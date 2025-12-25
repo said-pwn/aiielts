@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           : 'py-6 bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-3">
+  
             
           <div className="flex flex-col items-center gap-1">
           <div className="space-y-6">
@@ -83,7 +83,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
 </div>
 
-          </Link>
           
           <div className="flex items-center gap-8">
             {navItems.map(item => (
@@ -123,7 +122,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Header */}
       <div className="mobile-header md:hidden fixed top-0 left-0 right-0 z-[100000] h-20 px-4 flex justify-between items-center bg-white/80 dark:bg-brand-black/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 transition-all">
-        <Link to="/" className="flex items-center gap-2">
+       
          
         <div className="space-y-6">
                 <Link to="/" className="flex items-center gap-3">
@@ -132,7 +131,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
                
               </div>
-        </Link>
+       
         
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-slate-100 dark:bg-white/5 p-0.5 rounded-xl border border-slate-200 dark:border-white/5">
