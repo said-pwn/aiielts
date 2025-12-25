@@ -16,6 +16,9 @@ const cleanJson = (text: string): string => {
   }
 };
 
+// Используем gemini-3-flash-preview для всех задач, так как у нее самые высокие бесплатные лимиты
+const DEFAULT_MODEL = 'gemini-3-flash-preview';
+
 export const evaluateEssay = async (submission: WritingSubmission): Promise<IELTSEvaluation> => {
   const ai = getAIClient();
   
@@ -34,12 +37,11 @@ export const evaluateEssay = async (submission: WritingSubmission): Promise<IELT
   Return valid JSON.`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview', // Switch to Pro for evaluation
+    model: DEFAULT_MODEL, 
     contents: [{ parts: [{ text: promptText }] }],
     config: {
       responseMimeType: "application/json",
-      temperature: 0,
-      thinkingConfig: { thinkingBudget: 32768 },
+      temperature: 0.1,
       responseSchema: {
         type: Type.OBJECT,
         properties: {
@@ -116,7 +118,7 @@ export const getAudioFeedback = async (text: string): Promise<string> => {
 export const quickScanEssay = async (essay: string): Promise<string> => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: DEFAULT_MODEL,
     contents: [{ parts: [{ text: `Identify 3 high-level Band 9.0 adjustments for: "${essay}"` }] }],
   });
   return response.text?.trim() || "Analysis complete.";
@@ -125,7 +127,7 @@ export const quickScanEssay = async (essay: string): Promise<string> => {
 export const transmuteVocabulary = async (word: string): Promise<{ band7: string; band8: string; band9: string }> => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: DEFAULT_MODEL,
     contents: [{ parts: [{ text: `IELTS synonyms for "${word}" for bands 7, 8, 9.` }] }],
     config: {
       responseMimeType: "application/json",
@@ -146,7 +148,7 @@ export const transmuteVocabulary = async (word: string): Promise<{ band7: string
 export const transformSentence = async (sentence: string): Promise<{ band7: string; band8: string; band9: string }> => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: DEFAULT_MODEL,
     contents: [{ parts: [{ text: `Syntactic upgrade for: "${sentence}"` }] }],
     config: {
       responseMimeType: "application/json",
@@ -167,7 +169,7 @@ export const transformSentence = async (sentence: string): Promise<{ band7: stri
 export const generateWritingTopic = async (type: TaskType): Promise<string> => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: DEFAULT_MODEL,
     contents: [{ parts: [{ text: `Generate a 2025 IELTS ${type} topic.` }] }],
   });
   return response.text?.trim() || "Topic generation failed.";
@@ -176,7 +178,7 @@ export const generateWritingTopic = async (type: TaskType): Promise<string> => {
 export const brainstormIdeas = async (promptText: string, taskType: TaskType) => {
   const ai = getAIClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: DEFAULT_MODEL,
     contents: [{ parts: [{ text: `Brainstorm Band 9.0 ideas for: "${promptText}"` }] }],
     config: { responseMimeType: "application/json" }
   });
@@ -186,7 +188,7 @@ export const brainstormIdeas = async (promptText: string, taskType: TaskType) =>
 export const chatWithExaminer = async (history: any[], newMessage: string) => {
   const ai = getAIClient();
   const chat = ai.chats.create({
-    model: 'gemini-3-flash-preview',
+    model: DEFAULT_MODEL,
     config: { systemInstruction: 'You are an IELTS Examiner. Provide critical academic feedback.' },
   });
   const response = await chat.sendMessage({ message: newMessage });

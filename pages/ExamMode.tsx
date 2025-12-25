@@ -69,7 +69,7 @@ const ExamMode: React.FC = () => {
       setTempGeneratedTopic(newPrompt);
     } catch (err: any) {
       if (err.message?.includes('429')) {
-        setError("API Quota Reached (20/20 requests). Please wait a few minutes or try again later.");
+        setError(t('error_quota') || "Daily limit reached. Please wait a minute or try again tomorrow.");
       } else {
         setError(t('error_generic'));
       }
@@ -97,7 +97,7 @@ const ExamMode: React.FC = () => {
       setBrainstormResult(result);
     } catch (err: any) {
       if (err.message?.includes('429')) {
-        setError("AI Limit Reached. Free tier allows 20 requests/day.");
+        setError(t('error_quota') || "Daily limit reached. Please wait a minute.");
       } else {
         setError(t('error_ai'));
       }
@@ -131,9 +131,9 @@ const ExamMode: React.FC = () => {
       console.error("Submit Error:", err);
       setIsTimerRunning(wasTimerRunning);
       if (err.message?.includes('429')) {
-        setError("QUOTA EXCEEDED: Your 20 daily AI evaluations are used up. Please try again tomorrow.");
+        setError("ЛИМИТ ИСЧЕРПАН: Пожалуйста, подождите 60 секунд и попробуйте нажать кнопку снова.");
       } else {
-        setError("AI Analysis is currently busy. Please try again in 15 seconds.");
+        setError("Служба ИИ сейчас занята. Пожалуйста, попробуйте отправить еще раз через 15 секунд.");
       }
     } finally {
       setIsEvaluating(false);
@@ -156,8 +156,7 @@ const ExamMode: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-12 animate-fadeIn pb-40 relative">
       
-      {/* Title Section */}
-      <div className="mb-8 md:mb-16">
+      <div className="mb-6 md:mb-16">
         <h1 className="text-4xl md:text-8xl font-black text-brand-dark dark:text-white mb-2 tracking-tighter uppercase leading-tight">{t('nav_exam')}</h1>
         <div className="flex items-center gap-3">
            <div className="w-8 h-px bg-brand-primary"></div>
@@ -165,21 +164,21 @@ const ExamMode: React.FC = () => {
         </div>
       </div>
 
-      {/* MOBILE ACTION BAR - Fixed to bottom instead of top to avoid title overlap entirely */}
-      <div className={`lg:hidden fixed bottom-24 left-4 right-4 z-[100] transition-all duration-500 transform ${ (isTimerRunning || essay.length > 0) ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
-        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/10 dark:border-white/10 rounded-3xl px-6 py-4 flex items-center justify-between shadow-2xl">
-          <div className="flex items-center gap-6">
+      {/* MOBILE ACTION BAR - Fixed positioning to avoid overlapping title */}
+      <div className={`lg:hidden sticky top-[85px] z-[50] mb-8  transition-all duration-500 transform ${ (isTimerRunning || essay.length > 0) ? 'translate-y-0 opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden'}`}>
+        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/10 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center justify-between shadow-xl">
+          <div className="flex items-center gap-4">
              <div className="flex flex-col">
-                <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Time</span>
-                <span className={`text-base font-black tabular-nums ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-brand-primary'}`}>{formatTime(timeLeft)}</span>
+                <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Timer</span>
+                <span className={`text-sm font-black tabular-nums ${timeLeft < 300 ? 'text-rose-500 animate-pulse' : 'text-brand-primary'}`}>{formatTime(timeLeft)}</span>
              </div>
-             <div className="w-px h-8 bg-slate-200 dark:bg-white/10"></div>
+             <div className="w-px h-6 bg-slate-200 dark:bg-white/10"></div>
              <div className="flex flex-col">
-                <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Words</span>
-                <span className={`text-base font-black tabular-nums ${isUnderLength ? 'text-rose-500' : 'text-brand-dark dark:text-white'}`}>{wordCount}</span>
+                <span className="text-[6px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Words</span>
+                <span className={`text-sm font-black tabular-nums ${isUnderLength ? 'text-rose-500' : 'text-brand-dark dark:text-white'}`}>{wordCount}</span>
              </div>
           </div>
-          <button onClick={handleFinishAttempt} disabled={isEvaluating} className="px-6 py-3 bg-brand-primary text-brand-dark rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 disabled:opacity-50 shadow-lg">
+          <button onClick={handleFinishAttempt} disabled={isEvaluating} className="px-5 py-2.5 bg-brand-primary text-brand-dark rounded-xl font-black text-[9px] uppercase tracking-widest active:scale-95 disabled:opacity-50 shadow-md">
             {isEvaluating ? <i className="fas fa-spinner fa-spin"></i> : t('finish_protocol')}
           </button>
         </div>
@@ -187,7 +186,7 @@ const ExamMode: React.FC = () => {
 
       {error && (
         <div className="mb-8 p-5 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-4 animate-slideUp">
-          <i className="fas fa-exclamation-circle text-lg"></i>
+          <i className="fas fa-exclamation-circle text-lg shrink-0"></i>
           <span className="flex-1">{error}</span>
         </div>
       )}

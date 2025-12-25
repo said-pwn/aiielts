@@ -189,7 +189,7 @@ const Welcome: React.FC = () => {
                     ) : (
                        <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-100 dark:border-white/5 rounded-[2.5rem] text-slate-300 dark:text-white/10 text-center">
                           <i className="fas fa-compass-drafting text-4xl mb-6"></i>
-                          <p className="text-[9px] font-black uppercase tracking-[0.3em]">Neural Interface Waitin</p>
+                          <p className="text-[9px] font-black uppercase tracking-[0.3em]">AI Interface Waiting</p>
                        </div>
                     )}
                  </div>

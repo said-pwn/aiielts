@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { Language } from '../types';
 import React, { useState, useEffect } from 'react';
 
+
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -69,13 +70,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <BrandLogo />
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tighter uppercase text-brand-dark dark:text-white">
-                IELTSWRITING<span className="text-brand-primary">.UZ</span>
-              </span>
-              <span className="text-[8px] font-bold text-brand-secondary dark:text-emerald-400 uppercase tracking-widest mt-0.5">Academic Expert</span>
-            </div>
+            
+          <div className="flex flex-col items-center gap-1">
+          <div className="space-y-6">
+                <Link to="/" className="flex items-center gap-3">
+                  <BrandLogo className="w-8 h-8" />
+                  <span className="text-lg font-black tracking-tighter uppercase">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
+                </Link>
+                
+              </div>
+
+  
+</div>
+
           </Link>
           
           <div className="flex items-center gap-8">
@@ -117,8 +124,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Mobile Header */}
       <div className="mobile-header md:hidden fixed top-0 left-0 right-0 z-[100000] h-20 px-4 flex justify-between items-center bg-white/80 dark:bg-brand-black/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 transition-all">
         <Link to="/" className="flex items-center gap-2">
-          <BrandLogo className="w-8 h-8" />
-          <span className="text-sm font-black tracking-tighter uppercase text-brand-dark dark:text-white">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
+         
+        <div className="space-y-6">
+                <Link to="/" className="flex items-center gap-3">
+                  <BrandLogo className="w-8 h-8" />
+                  <span className="text-lg font-black tracking-tighter uppercase">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
+                </Link>
+               
+              </div>
         </Link>
         
         <div className="flex items-center gap-2">
@@ -140,7 +153,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       <div className="mobile-bottom-nav md:hidden fixed bottom-6 inset-x-0 flex justify-center z-[100000] pointer-events-none px-4 transition-all">
-        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/10 dark:border-white/20 rounded-[2.5rem] shadow-[0_15px_50px_rgba(0,0,0,0.2)] p-2 flex justify-around items-center w-full max-w-[320px] pointer-events-auto">
+        <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/10 dark:border-white/20 rounded-[2.5rem] shadow-[0_15px_50px_rgba(0,0,0,0.2)] p-1 flex justify-around items-center w-full max-w-[320px] pointer-events-auto">
            {navItems.map(item => {
              const isActive = location.pathname === item.path;
              return (
@@ -185,32 +198,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-brand-primary to-transparent opacity-30"></div>
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start mb-16">
-              <div className="space-y-6">
+            <div className="space-y-6">
                 <Link to="/" className="flex items-center gap-3">
                   <BrandLogo className="w-8 h-8" />
                   <span className="text-lg font-black tracking-tighter uppercase">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
                 </Link>
                 <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-xs">
-                  Профессиональная платформа для подготовки к IELTS Writing с использованием передовых нейросетевых технологий.
+                  Платформа для провекри IELTS Writing с использованием AI.
                 </p>
               </div>
 
-              <div className="space-y-6">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Contact Us</h4>
-                <div className="space-y-4">
-                  <a href="mailto:support@ieltswriting.uz" className="flex items-center gap-4 text-xs font-bold text-slate-300 hover:text-white transition-colors">
-                    <i className="fas fa-envelope text-brand-primary w-4"></i>
-                    support@ieltswriting.uz
-                  </a>
-                  <div className="flex items-center gap-4 text-xs font-bold text-slate-300">
-                    <i className="fas fa-location-dot text-brand-primary w-4"></i>
-                    Tashkent, Uzbekistan
-                  </div>
-                </div>
-              </div>
+              
 
               <div className="space-y-6">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Telegram Support</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">contact Us</h4>
                 <a 
                   href="https://t.me/sddffhf1" 
                   target="_blank" 
@@ -220,14 +221,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <i className="fab fa-telegram-plane text-xl text-[#26A5E4] group-hover:scale-110 transition-transform"></i>
                   <div className="flex flex-col">
                     <span className="text-[10px] font-black uppercase tracking-widest text-white">Telegram</span>
-                    <span className="text-[9px] font-bold text-slate-400">@sddffhf1</span>
+                    {/* <span className="text-[9px] font-bold text-slate-400">@sddffhf1</span> */}
                   </div>
                 </a>
               </div>
             </div>
 
             <div className="pt-8 border-t border-white/5 text-center">
-              <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-600">© {new Date().getFullYear()} IELTSWRITING.UZ — GLOBAL ACADEMIC EXCELLENCE</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-600">© {new Date().getFullYear()} IELTSWRITING.UZ — check your IELTS writing level</p>
             </div>
         </div>
         <div className="h-28 md:hidden"></div>
