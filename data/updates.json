@@ -36,5 +36,22 @@
       ]
     }
     
+  },
+  {
+    "version": "v2.5.1",
+    "date": "24.12.2025",
+    "isLatest": false,
+    "changes": {
+      "en": [
+        "Initial release of Neural Examiner",
+        "Added Exam Simulation mode",
+        "Implemented Voice Feedbac"
+      ],
+      "ru": [
+        "Первый релиз Нейронного Экзаменатора",
+        "Добавлен  экзамена",
+        "Внедрена голосовая обратная связь"
+      ]
+    }
   }
 ]
