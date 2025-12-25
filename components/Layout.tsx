@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Language } from '../types';
+import { FaTelegram } from 'react-icons/fa';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -205,16 +206,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <div className="lg:col-span-6 flex flex-col items-center sm:items-start space-y-6">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Infrastructure</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">CONTACT US</h4>
               <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 flex items-center gap-5">
                  <div className="relative flex items-center justify-center">
-                    <div className="w-3 h-3 bg-brand-primary rounded-full animate-ping absolute"></div>
-                    <div className="w-3 h-3 bg-brand-primary rounded-full relative"></div>
-                 </div>
-                 <div>
-                    <p className="text-[11px] font-black text-white uppercase tracking-wider leading-none">System Status: Optimal</p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-widest">Active nodes: 12 / Latency: 84ms</p>
-                 </div>
+                    <FaTelegram size={30}/>
+               
+                 </div >
+                 <a href="https://t.me/sddffhf1">Telegram</a>
               </div>
             </div>
           </div>
