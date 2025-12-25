@@ -3,13 +3,14 @@ import { GoogleGenAI } from "@google/genai";
 
 /**
  * Инициализация клиента Gemini.
- * ВАЖНО: На Vercel вы должны добавить API_KEY в Settings -> Environment Variables.
+ * Переменная окружения 'API_KEY' должна быть настроена в панели Vercel.
  */
 export const getAIClient = () => {
   const apiKey = process.env.API_KEY;
   
-  if (!apiKey || apiKey === "undefined" || apiKey.length < 5) {
-    throw new Error("API Key is missing. Please set 'API_KEY' in your Vercel Project Settings (Environment Variables).");
+  if (!apiKey || apiKey === "undefined") {
+    // Выбрасываем ошибку, чтобы WritingPanel мог её поймать и показать пользователю
+    throw new Error("API Key is missing. Please add 'API_KEY' to your Vercel Environment Variables.");
   }
   
   return new GoogleGenAI({ apiKey });
