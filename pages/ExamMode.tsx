@@ -39,7 +39,6 @@ const ExamMode: React.FC = () => {
   const minWords = taskType === TaskType.TASK1 ? 150 : 250;
   const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0;
   const isUnderLength = wordCount < minWords && wordCount > 0;
-  const initialTime = taskType === TaskType.TASK1 ? 1200 : 2400;
 
   useEffect(() => {
     const stateToSave = { taskType, prompt, essay, timeLeft, isTimerRunning };
@@ -68,7 +67,7 @@ const ExamMode: React.FC = () => {
       const newPrompt = await generateWritingTopic(taskType);
       setPrompt(newPrompt);
     } catch (err: any) {
-      setError(err.message || t('error_generic'));
+      setError(t('error_generic'));
     } finally {
       setIsGeneratingTopic(false);
     }
@@ -85,7 +84,7 @@ const ExamMode: React.FC = () => {
       const result = await brainstormIdeas(prompt, taskType);
       setBrainstormResult(result);
     } catch (err: any) {
-      setError(err.message || t('error_ai'));
+      setError(t('error_ai'));
     } finally {
       setIsBrainstorming(false);
     }
@@ -104,13 +103,19 @@ const ExamMode: React.FC = () => {
     setShowLengthWarning(false);
     setError(null);
     setIsEvaluating(true);
+    
+    const wasTimerRunning = isTimerRunning;
     setIsTimerRunning(false);
+
     try {
       const result = await evaluateEssay({ taskType, prompt, essay });
       localStorage.removeItem(EXAM_STORAGE_KEY);
       navigate('/results', { state: { evaluation: result } });
     } catch (err: any) {
-      setError(err.message || t('error_eval'));
+      console.error("Submit Error:", err);
+      setIsTimerRunning(wasTimerRunning);
+      setError("AI Analysis is currently busy. Please try again in 15 seconds.");
+    } finally {
       setIsEvaluating(false);
     }
   };
@@ -127,7 +132,6 @@ const ExamMode: React.FC = () => {
   };
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  const progressPercent = Math.max(0, (timeLeft / initialTime) * 100);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-12 animate-fadeIn pb-40">
@@ -163,7 +167,7 @@ const ExamMode: React.FC = () => {
       {error && (
         <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-slideUp">
           <i className="fas fa-exclamation-circle"></i>
-          <span className="break-words">{error}</span>
+          {error}
         </div>
       )}
 

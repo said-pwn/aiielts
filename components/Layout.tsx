@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Language } from '../types';
-import { FaTelegram } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -28,6 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { language, setLanguage, t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [tgVisible, setTgVisible] = useState(true);
+
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -53,24 +53,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
-
   const navItems = [
     { path: '/', label: t('nav_home'), icon: 'fa-house' },
     { path: '/practice/exam', label: t('nav_exam'), icon: 'fa-stopwatch' },
     { path: '/practice/check', label: t('nav_marker'), icon: 'fa-bolt-lightning' },
   ];
 
-  const isFooterLinkActive = (path: string) => location.pathname === path;
-
   return (
     <div className="min-h-screen flex flex-col transition-colors duration-500 bg-white dark:bg-brand-black">
       {/* Desktop Navbar */}
-      <nav className={`desktop-nav fixed top-0 left-0 right-0 z-[10000] transition-all duration-500 hidden md:block ${
+      <nav className={`desktop-nav fixed top-0 left-0 right-0 z-[100000] transition-all duration-500 hidden md:block ${
         scrolled 
-          ? 'py-3 bg-white/80 dark:bg-brand-black/80 backdrop-blur-2xl shadow-2xl border-b border-brand-primary/10' 
+          ? 'py-3 bg-white/90 dark:bg-brand-black/90 backdrop-blur-3xl shadow-2xl border-b border-brand-primary/10' 
           : 'py-6 bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -97,47 +91,55 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             ))}
 
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/5">
-               <button 
-                onClick={() => setLanguage(Language.RU)}
-                className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${language === Language.RU ? 'bg-brand-primary text-brand-dark shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-               >RU</button>
-               <button 
-                onClick={() => setLanguage(Language.EN)}
-                className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${language === Language.EN ? 'bg-brand-primary text-brand-dark shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-               >EN</button>
-            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/5">
+                <button 
+                  onClick={() => setLanguage(Language.RU)}
+                  className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${language === Language.RU ? 'bg-brand-primary text-brand-dark shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                >RU</button>
+                <button 
+                  onClick={() => setLanguage(Language.EN)}
+                  className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all ${language === Language.EN ? 'bg-brand-primary text-brand-dark shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                >EN</button>
+              </div>
 
-            <button 
-              onClick={() => setIsDark(!isDark)} 
-              className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-100 dark:border-emerald-800 transition-all hover:scale-110"
-            >
-              <i className={`fas ${isDark ? 'fa-sun text-brand-gold' : 'fa-moon text-brand-secondary'}`}></i>
-            </button>
+              <button 
+                onClick={() => setIsDark(!isDark)} 
+                className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-100 dark:border-emerald-800 transition-all hover:scale-110"
+              >
+                <i className={`fas ${isDark ? 'fa-sun text-brand-gold' : 'fa-moon text-brand-secondary'}`}></i>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
       {/* Mobile Header */}
-      <div className="mobile-header md:hidden fixed top-0 left-0 right-0 z-[10000] p-4 flex justify-between items-center bg-white/60 dark:bg-brand-black/60 backdrop-blur-xl border-b border-black/5 dark:border-white/5 transition-all">
+      <div className="mobile-header md:hidden fixed top-0 left-0 right-0 z-[100000] h-20 px-4 flex justify-between items-center bg-white/80 dark:bg-brand-black/80 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 transition-all">
         <Link to="/" className="flex items-center gap-2">
           <BrandLogo className="w-8 h-8" />
           <span className="text-sm font-black tracking-tighter uppercase text-brand-dark dark:text-white">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
         </Link>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setLanguage(language === Language.RU ? Language.EN : Language.RU)}
-            className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-[10px] font-black text-slate-500 dark:text-emerald-400 border border-slate-200 dark:border-white/5"
-          >
-            {language.toUpperCase()}
-          </button>
-          <button onClick={() => setIsDark(!isDark)} className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-emerald-400">
+        
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-slate-100 dark:bg-white/5 p-0.5 rounded-xl border border-slate-200 dark:border-white/5">
+             <button 
+              onClick={() => setLanguage(Language.RU)}
+              className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase transition-all ${language === Language.RU ? 'bg-brand-primary text-brand-dark' : 'text-slate-400'}`}
+             >RU</button>
+             <button 
+              onClick={() => setLanguage(Language.EN)}
+              className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase transition-all ${language === Language.EN ? 'bg-brand-primary text-brand-dark' : 'text-slate-400'}`}
+             >EN</button>
+          </div>
+
+          <button onClick={() => setIsDark(!isDark)} className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-emerald-400 border border-black/5 dark:border-white/10 rounded-xl">
             <i className={`fas ${isDark ? 'fa-sun' : 'fa-moon'}`}></i>
           </button>
         </div>
       </div>
 
-      <div className="mobile-bottom-nav md:hidden fixed bottom-6 inset-x-0 flex justify-center z-[10001] pointer-events-none px-4 transition-all">
+      <div className="mobile-bottom-nav md:hidden fixed bottom-6 inset-x-0 flex justify-center z-[100000] pointer-events-none px-4 transition-all">
         <div className="bg-white/95 dark:bg-brand-black/95 backdrop-blur-3xl border border-black/10 dark:border-white/20 rounded-[2.5rem] shadow-[0_15px_50px_rgba(0,0,0,0.2)] p-2 flex justify-around items-center w-full max-w-[320px] pointer-events-auto">
            {navItems.map(item => {
              const isActive = location.pathname === item.path;
@@ -149,16 +151,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                >
                   <i className={`fas ${item.icon} ${isActive ? 'text-lg' : 'text-base'} transition-all`}></i>
                   <span className={`text-[7px] font-black uppercase tracking-widest ${isActive ? 'opacity-100' : 'opacity-70'}`}>{item.label}</span>
-                  {isActive && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-brand-primary rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
-                  )}
                </Link>
              );
            })}
         </div>
       </div>
 
-      <main className="flex-grow pt-20 md:pt-40 pb-28 md:pb-12">
+      <main className="flex-grow pt-24 md:pt-32 pb-28 md:pb-12">
         {children}
       </main>
 
@@ -184,41 +183,52 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <footer className="bg-brand-black text-white relative border-t border-white/5 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-brand-primary to-transparent opacity-30"></div>
-        
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-            <div className="lg:col-span-4 flex flex-col items-center sm:items-start text-center sm:text-left space-y-6">
-              <Link to="/" className="flex items-center gap-3">
-                <BrandLogo className="w-10 h-10" />
-                <span className="text-xl font-black tracking-tighter uppercase">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
-              </Link>
-              <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs">
-                Check your IELTS writing level with ai
-              </p>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start mb-16">
+              <div className="space-y-6">
+                <Link to="/" className="flex items-center gap-3">
+                  <BrandLogo className="w-8 h-8" />
+                  <span className="text-lg font-black tracking-tighter uppercase">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
+                </Link>
+                <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-xs">
+                  Профессиональная платформа для подготовки к IELTS Writing с использованием передовых нейросетевых технологий.
+                </p>
+              </div>
 
-            <div className="lg:col-span-2 space-y-6">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Assessments</h4>
-              <ul className="flex flex-col gap-4 text-xs font-bold">
-                <li><Link to="/practice/exam" className={`transition-colors duration-300 ${isFooterLinkActive('/practice/exam') ? 'text-brand-primary underline underline-offset-8' : 'text-slate-300 hover:text-white'}`}>{t('exam_sim_title')}</Link></li>
-                <li><Link to="/practice/check" className={`transition-colors duration-300 ${isFooterLinkActive('/practice/check') ? 'text-brand-primary underline underline-offset-8' : 'text-slate-300 hover:text-white'}`}>{t('marker_title')}</Link></li>
-              </ul>
-            </div>
+              <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Contact Us</h4>
+                <div className="space-y-4">
+                  <a href="mailto:support@ieltswriting.uz" className="flex items-center gap-4 text-xs font-bold text-slate-300 hover:text-white transition-colors">
+                    <i className="fas fa-envelope text-brand-primary w-4"></i>
+                    support@ieltswriting.uz
+                  </a>
+                  <div className="flex items-center gap-4 text-xs font-bold text-slate-300">
+                    <i className="fas fa-location-dot text-brand-primary w-4"></i>
+                    Tashkent, Uzbekistan
+                  </div>
+                </div>
+              </div>
 
-            <div className="lg:col-span-6 flex flex-col items-center sm:items-start space-y-6">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">CONTACT US</h4>
-              <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 flex items-center gap-5">
-                 <div className="relative flex items-center justify-center">
-                    <FaTelegram size={30}/>
-               
-                 </div >
-                 <a href="https://t.me/sddffhf1">Telegram</a>
+              <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-primary">Telegram Support</h4>
+                <a 
+                  href="https://t.me/sddffhf1" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-4 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group"
+                >
+                  <i className="fab fa-telegram-plane text-xl text-[#26A5E4] group-hover:scale-110 transition-transform"></i>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Telegram</span>
+                    <span className="text-[9px] font-bold text-slate-400">@sddffhf1</span>
+                  </div>
+                </a>
               </div>
             </div>
-          </div>
-          <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-center text-[9px] font-black uppercase tracking-[0.5em] text-slate-600">
-            <p>© {new Date().getFullYear()} IELTSWRITING.UZ — CHECK YOUR IELTS WRITING</p>
-          </div>
+
+            <div className="pt-8 border-t border-white/5 text-center">
+              <p className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-600">© {new Date().getFullYear()} IELTSWRITING.UZ — GLOBAL ACADEMIC EXCELLENCE</p>
+            </div>
         </div>
         <div className="h-28 md:hidden"></div>
       </footer>

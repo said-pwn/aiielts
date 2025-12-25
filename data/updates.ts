@@ -11,15 +11,38 @@ export interface SystemUpdate {
 
 export const updatesData: SystemUpdate[] = [
   {
-    "version": "v2.5.0",
-    "date": "25.12.2025",
+    "version": "v2.5.4",
+    "date": "22.05.2024",
     "isLatest": true,
     "changes": {
       "en": [
-        "test"
+        "Optimized typography for a cleaner, professional look",
+        "Redesigned Vocab Lab to match Sentence Architect layout",
+        "Improved mobile responsiveness for all laboratory tools",
+        "Updated AI engine for faster synthesis"
       ],
       "ru": [
-        "test"
+        "Оптимизирована типографика для более чистого вида",
+        "Vocab Lab переделан под стиль Sentence Architect",
+        "Улучшена адаптивность всех лабораторных инструментов",
+        "Обновлен движок ИИ для более быстрого синтеза"
+      ]
+    }
+  },
+  {
+    "version": "v2.5.0",
+    "date": "15.05.2024",
+    "isLatest": false,
+    "changes": {
+      "en": [
+        "Initial release of Neural Examiner",
+        "Added Exam Simulation mode",
+        "Implemented Voice Feedback"
+      ],
+      "ru": [
+        "Первый релиз Нейронного Экзаменатора",
+        "Добавлен режим симуляции экзамена",
+        "Внедрена голосовая обратная связь"
       ]
     }
   }

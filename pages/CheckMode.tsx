@@ -63,7 +63,7 @@ const CheckMode: React.FC = () => {
       localStorage.removeItem(CHECK_STORAGE_KEY);
       navigate('/results', { state: { evaluation: result } });
     } catch (err: any) {
-      setError(err.message || "AI Evaluation service failed.");
+      setError("AI Evaluation failed. Please check your API key in Vercel settings and ensure you have redeployed.");
       setIsEvaluating(false);
     }
   };
@@ -78,8 +78,8 @@ const CheckMode: React.FC = () => {
     try {
       const result = await brainstormIdeas(prompt, taskType);
       setBrainstormResult(result);
-    } catch (err: any) {
-      setError(err.message || "Brainstorming failed.");
+    } catch (err) {
+      setError("Brainstorming failed.");
     } finally {
       setIsBrainstorming(false);
     }
@@ -91,8 +91,8 @@ const CheckMode: React.FC = () => {
     try {
       const newPrompt = await generateWritingTopic(taskType);
       setGeneratedTopic(newPrompt);
-    } catch (err: any) {
-      setError(err.message || "Failed to generate a topic.");
+    } catch (err) {
+      setError("Failed to generate topic.");
     } finally {
       setIsGeneratingTopic(false);
     }
@@ -113,8 +113,8 @@ const CheckMode: React.FC = () => {
     try {
       const feedback = await quickScanEssay(essay);
       setQuickFeedback(feedback);
-    } catch (err: any) {
-      setError(err.message || "Quick scan unavailable.");
+    } catch (err) {
+      setError("Quick scan failed.");
     } finally {
       setIsEvaluating(false);
     }
@@ -133,14 +133,14 @@ const CheckMode: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12 animate-fadeIn pb-24 md:pb-32">
       <div className="text-center mb-10 md:mb-16">
-        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-4 md:mb-6 tracking-tight uppercase leading-tight">{t('nav_marker')}</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-brand-dark dark:text-white mb-4 md:mb-6 tracking-tight uppercase leading-tight">{t('nav_marker')}</h1>
         <p className="text-slate-500 dark:text-slate-200 font-medium text-xs md:text-lg uppercase tracking-widest leading-relaxed">Professional assessment for your drafts.</p>
       </div>
 
       {error && (
         <div className="mb-6 md:mb-8 p-4 md:p-5 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-2xl md:rounded-[2rem] text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-shake">
           <i className="fas fa-exclamation-triangle text-base md:text-lg text-rose-500"></i>
-          <span className="break-words">{error}</span>
+          <span>{error}</span>
         </div>
       )}
 

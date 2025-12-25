@@ -1,12 +1,41 @@
 
-import React, { useEffect, useState, useRef } from 'react';
 import { IELTSEvaluation, CriterionFeedback } from '../types';
 import { getAudioFeedback, chatWithExaminer } from '../services/geminiService';
+import React, { useEffect, useState, useRef } from 'react';
 
-// Define the missing props interface for the ResultView component
 interface ResultViewProps {
   evaluation: IELTSEvaluation;
   onReset: () => void;
+}
+
+// Helper functions for audio processing
+function decodeBase64(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function decodeAudioData(
+  data: Uint8Array,
+  ctx: AudioContext,
+  sampleRate: number,
+  numChannels: number,
+): Promise<AudioBuffer> {
+  const dataInt16 = new Int16Array(data.buffer);
+  const frameCount = dataInt16.length / numChannels;
+  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+
+  for (let channel = 0; channel < numChannels; channel++) {
+    const channelData = buffer.getChannelData(channel);
+    for (let i = 0; i < frameCount; i++) {
+      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+    }
+  }
+  return buffer;
 }
 
 const ScoreBadge: React.FC<{ title: string; data: CriterionFeedback }> = ({ title, data }) => (
@@ -55,34 +84,38 @@ const ResultView: React.FC<ResultViewProps> = ({ evaluation, onReset }) => {
   }, [evaluation.overallBand]);
 
   const handlePlayAudio = async () => {
-    if (isPlaying) return;
+    if (isPlaying || isAudioLoading) return;
     setIsAudioLoading(true);
     try {
-      const base64 = await getAudioFeedback(evaluation.detailedAnalysis);
-      const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const base64Audio = await getAudioFeedback(evaluation.detailedAnalysis);
+      if (!base64Audio) throw new Error("No audio data received");
+
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       audioContextRef.current = ctx;
-      const dataInt16 = new Int16Array(bytes.buffer);
-      const buffer = ctx.createBuffer(1, dataInt16.length, 24000);
-      const channelData = buffer.getChannelData(0);
-      for (let i = 0; i < dataInt16.length; i++) channelData[i] = dataInt16[i] / 32768.0;
+
+      const audioBuffer = await decodeAudioData(
+        decodeBase64(base64Audio),
+        ctx,
+        24000,
+        1
+      );
+
       const source = ctx.createBufferSource();
-      source.buffer = buffer;
+      source.buffer = audioBuffer;
       source.connect(ctx.destination);
       source.onended = () => setIsPlaying(false);
       source.start();
       setIsPlaying(true);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Audio Playback Error:", err);
+      alert("Voice Feedback is temporarily unavailable. Please try again in a moment.");
     } finally {
       setIsAudioLoading(false);
     }
   };
 
   const handleSendChat = async () => {
-    if (!chatMessage.trim()) return;
+    if (!chatMessage.trim() || isChatLoading) return;
     const userMsg = chatMessage;
     setChatMessage('');
     setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
@@ -90,31 +123,37 @@ const ResultView: React.FC<ResultViewProps> = ({ evaluation, onReset }) => {
     try {
       const botResponse = await chatWithExaminer([], userMsg);
       setChatHistory(prev => [...prev, { role: 'bot', text: botResponse || '...' }]);
-    } catch (err) {
-      setChatHistory(prev => [...prev, { role: 'bot', text: 'Service busy.' }]);
+    } catch (err: any) {
+      setChatHistory(prev => [...prev, { role: 'bot', text: 'Examiner is currently busy. Please try again shortly.' }]);
     } finally {
       setIsChatLoading(false);
     }
   };
 
+  const copyPrototype = () => {
+    navigator.clipboard.writeText(evaluation.improvedVersion);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="space-y-12 md:space-y-24 pb-40 max-w-7xl mx-auto px-6">
+    <div className="space-y-12 md:space-y-24 pb-40 max-w-7xl mx-auto px-6 animate-fadeIn">
       {/* MASTER SCORE SECTION */}
       <div className="bg-brand-dark dark:bg-[#031d17] rounded-[4rem] p-12 md:p-24 text-white relative overflow-hidden shadow-3xl border border-white/5">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-brand-primary/10 rounded-full blur-[150px]"></div>
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="text-center md:text-left">
-            <h2 className="text-6xl md:text-9xl font-black mb-8 leading-none tracking-tighter">TOTAL <br/> SCORE</h2>
+            <h2 className="text-6xl md:text-9xl font-black mb-8 leading-none tracking-tighter uppercase">TOTAL <br/> SCORE</h2>
             <p className="text-emerald-100/60 text-lg md:text-xl font-medium max-w-sm mb-12">
-                Neural assessment conducted across all academic parameters.
+                Advanced neural evaluation based on official 2025 academic criteria.
             </p>
             <button 
               onClick={handlePlayAudio}
               disabled={isAudioLoading}
-              className="px-10 py-6 bg-brand-primary text-brand-dark rounded-3xl flex items-center gap-4 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-2xl font-black text-[11px] uppercase tracking-widest"
+              className={`px-10 py-6 bg-brand-primary text-brand-dark rounded-3xl flex items-center gap-4 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-2xl font-black text-[11px] uppercase tracking-widest group ${isPlaying ? 'ring-4 ring-emerald-400/30' : ''}`}
             >
-              <i className={`fas ${isPlaying ? 'fa-waveform' : isAudioLoading ? 'fa-spinner fa-spin' : 'fa-volume-high'}`}></i>
-              {isPlaying ? 'Analysis Playing' : 'Voice Feedback'}
+              <i className={`fas ${isPlaying ? 'fa-waveform' : isAudioLoading ? 'fa-spinner fa-spin' : 'fa-volume-high'} group-hover:rotate-12 transition-transform`}></i>
+              {isPlaying ? 'Analysis Playing' : isAudioLoading ? 'Generating Voice...' : 'Voice Feedback'}
             </button>
           </div>
           <div className="relative">
@@ -131,7 +170,7 @@ const ResultView: React.FC<ResultViewProps> = ({ evaluation, onReset }) => {
       {/* CRITERIA GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <ScoreBadge title="Task Response" data={evaluation.taskResponse} />
-        <ScoreBadge title="Cohesion & Cohesion" data={evaluation.coherenceCohesion} />
+        <ScoreBadge title="Coherence & Cohesion" data={evaluation.coherenceCohesion} />
         <ScoreBadge title="Lexical Resource" data={evaluation.lexicalResource} />
         <ScoreBadge title="Grammar Accuracy" data={evaluation.grammaticalRange} />
       </div>
@@ -149,31 +188,36 @@ const ResultView: React.FC<ResultViewProps> = ({ evaluation, onReset }) => {
           </section>
 
           {/* ACADEMIC PROTOTYPE */}
-          <section className="relative">
-            <div className="bg-[#fefcf8] dark:bg-[#04211a] rounded-[3rem] md:rounded-[4rem] p-12 md:p-24 shadow-2xl border border-amber-100 dark:border-emerald-800/30">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-16 border-b border-amber-100 dark:border-emerald-800/20 pb-12">
+          <section className="relative group">
+            <div className="bg-white dark:bg-[#04211a] rounded-[3rem] md:rounded-[4rem] p-10 md:p-20 shadow-2xl border border-slate-100 dark:border-emerald-800/30 transition-all">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12 border-b border-slate-100 dark:border-emerald-800/20 pb-10">
                 <div className="flex items-center gap-6">
-                   <div className="w-16 h-16 bg-amber-500/10 dark:bg-brand-primary/10 rounded-3xl flex items-center justify-center text-amber-600 dark:text-brand-primary text-2xl">
-                      <i className="fas fa-feather-pointed"></i>
+                   <div className="w-14 h-14 bg-emerald-50/10 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-brand-primary text-xl">
+                      <i className="fas fa-pen-nib"></i>
                    </div>
                    <div>
-                      <h3 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-none">
-                        PROTOTYPE
+                      <h3 className="text-2xl md:text-4xl font-black text-brand-dark dark:text-white tracking-tighter uppercase leading-none">
+                        ACADEMIC PROTOTYPE
                       </h3>
-                      <span className="text-[10px] font-black text-amber-600 dark:text-emerald-400 uppercase tracking-[0.4em] mt-3 block">Official Band 9.0 Benchmark</span>
+                      <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.4em] mt-3 block">High Precision Improvement</span>
                    </div>
                 </div>
                 <button 
-                  onClick={() => { navigator.clipboard.writeText(evaluation.improvedVersion); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                  className={`px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-brand-dark dark:bg-brand-primary text-white active:scale-95'}`}
+                  onClick={copyPrototype}
+                  className={`relative overflow-hidden group/btn px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all flex items-center gap-4 ${
+                    copied 
+                    ? 'bg-emerald-500 text-white scale-105' 
+                    : 'bg-brand-dark dark:bg-brand-primary text-white dark:text-brand-dark hover:brightness-110 active:scale-95'
+                  }`}
                 >
-                  {copied ? 'Copied to Clipboard' : 'Clone Script'}
+                  <i className={`fas ${copied ? 'fa-check-double' : 'fa-copy'} transition-transform duration-300`}></i>
+                  <span>{copied ? 'Copied to Clipboard' : 'Clone Sample'}</span>
                 </button>
               </div>
 
-              <div className="font-serif text-xl md:text-2xl italic leading-[1.9] text-slate-800 dark:text-emerald-50/80">
+              <div className="font-serif text-lg md:text-2xl leading-[2] text-slate-800 dark:text-emerald-50/90 tracking-wide selection:bg-brand-primary/20 p-4">
                 {evaluation.improvedVersion.split('\n').map((l, i) => l.trim() && (
-                  <p key={i} className="mb-10 last:mb-0 first-letter:text-5xl first-letter:font-black first-letter:mr-3 first-letter:float-left first-letter:leading-none first-letter:text-amber-600 dark:first-letter:text-brand-primary">
+                  <p key={i} className="mb-10 last:mb-0 first-letter:text-4xl first-letter:font-black first-letter:text-brand-primary">
                     {l}
                   </p>
                 ))}
@@ -182,48 +226,67 @@ const ResultView: React.FC<ResultViewProps> = ({ evaluation, onReset }) => {
           </section>
         </div>
 
-        {/* SIDEBAR */}
+        {/* SIDEBAR: CHAT INTERFACE - Adjusted top to 24 */}
         <div className="lg:col-span-4">
-          <div className="bg-white dark:bg-slate-900/60 p-10 rounded-[3rem] border border-slate-100 dark:border-white/5 shadow-xl sticky top-36">
-             <div className="flex items-center gap-5 mb-12">
-                <div className="w-14 h-14 bg-brand-primary/10 text-brand-primary rounded-2xl flex items-center justify-center text-2xl">
+          <div className="bg-white dark:bg-slate-900/60 p-10 rounded-[3.5rem] border border-slate-100 dark:border-white/5 shadow-2xl sticky top-24">
+             <div className="flex items-center gap-5 mb-10">
+                <div className="w-12 h-12 bg-brand-primary/10 text-brand-primary rounded-2xl flex items-center justify-center text-xl">
                   <i className="fas fa-comments"></i>
                 </div>
                 <div>
-                   <h4 className="text-lg font-black text-brand-dark dark:text-white leading-none">EXAMINER AI</h4>
-                   <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-2 block">Post-Session Chat</span>
+                   <h4 className="text-base font-black text-brand-dark dark:text-white leading-none uppercase tracking-tight">Examiner Chat</h4>
+                   <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-2 block">AI Consultation active</span>
                 </div>
              </div>
              
-             <div className="h-[450px] overflow-y-auto mb-10 p-6 bg-slate-50 dark:bg-brand-black/30 rounded-[2rem] border border-slate-100 dark:border-white/5 space-y-6">
+             <div className="h-[450px] overflow-y-auto mb-8 p-6 bg-slate-50 dark:bg-brand-black/30 rounded-[3rem] border border-slate-100 dark:border-white/5 space-y-6 custom-scrollbar scroll-smooth">
                 {chatHistory.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4 opacity-30">
-                    <i className="fas fa-robot text-4xl mb-2"></i>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">Ask about sentence structures or lexical choices used in this essay.</p>
+                  <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-6 opacity-40">
+                    <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                       <i className="fas fa-robot text-2xl"></i>
+                    </div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] leading-relaxed max-w-[180px]">Ask specific questions about your score or ways to improve.</p>
                   </div>
                 )}
                 {chatHistory.map((m, i) => (
-                  <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[90%] p-6 rounded-3xl text-[14px] font-semibold leading-relaxed ${m.role === 'user' ? 'bg-brand-dark dark:bg-brand-primary text-white' : 'bg-white dark:bg-slate-800 text-brand-dark dark:text-slate-100 shadow-sm'}`}>
+                  <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-slideUp`}>
+                    <div className={`max-w-[90%] p-5 rounded-[2rem] text-[13px] font-semibold leading-relaxed shadow-sm ${
+                      m.role === 'user' 
+                      ? 'bg-brand-dark dark:bg-brand-primary text-white dark:text-brand-dark rounded-tr-none' 
+                      : 'bg-white dark:bg-slate-800 text-brand-dark dark:text-slate-100 rounded-tl-none border border-black/5 dark:border-white/5'
+                    }`}>
                       {m.text}
                     </div>
                   </div>
                 ))}
-                {isChatLoading && <div className="text-[9px] text-brand-primary font-black animate-pulse uppercase tracking-[0.3em] text-center">Architecting Response...</div>}
+                {isChatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl flex gap-2 border border-black/5 dark:border-white/5">
+                       <span className="w-2 h-2 bg-brand-primary rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                       <span className="w-2 h-2 bg-brand-primary rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                       <span className="w-2 h-2 bg-brand-primary rounded-full animate-bounce"></span>
+                    </div>
+                  </div>
+                )}
              </div>
              
-             <div className="flex gap-3">
+             <div className="relative group">
                 <input 
                   type="text" 
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendChat()}
-                  placeholder="Inquiry..."
-                  className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-primary transition-all"
+                  placeholder="Ask for clarification..."
+                  className="w-full bg-slate-100 dark:bg-slate-800/80 border-2 border-transparent focus:border-brand-primary/50 rounded-full pl-8 pr-16 py-6 text-sm font-bold outline-none transition-all dark:text-white"
                 />
                 <button 
                   onClick={handleSendChat}
-                  className="w-14 h-14 bg-brand-primary text-brand-dark rounded-2xl flex items-center justify-center shadow-lg transition-transform active:scale-90"
+                  disabled={isChatLoading || !chatMessage.trim()}
+                  className={`absolute right-2.5 top-2.5 bottom-2.5 w-12 rounded-full flex items-center justify-center transition-all ${
+                    chatMessage.trim() && !isChatLoading
+                    ? 'bg-brand-primary text-brand-dark shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-90'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                  }`}
                 >
                   <i className="fas fa-paper-plane text-sm"></i>
                 </button>

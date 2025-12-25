@@ -32,7 +32,7 @@ const Welcome: React.FC = () => {
       const result = await transmuteVocabulary(vocabInput);
       setVocabResult(result);
     } catch (err: any) {
-      setError(err.message || "API Error");
+      setError("Service Error: Please verify your connection or API key.");
     } finally {
       setIsTransmuting(false);
     }
@@ -47,7 +47,7 @@ const Welcome: React.FC = () => {
       const result = await transformSentence(sentenceInput);
       setSentenceResult(result);
     } catch (err: any) {
-      setError(err.message || "API Error");
+      setError("Service Error: Please verify your connection or API key.");
     } finally {
       setIsArchitecting(false);
     }
@@ -75,7 +75,7 @@ const Welcome: React.FC = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
             </span>
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand-secondary dark:text-emerald-400">
-              {latestUpdate.version}  <span className="mx-2 opacity-30">|</span> <span className="group-hover:underline underline-offset-4">{t('whats_new')}</span>
+              {latestUpdate.version} <span className="mx-2 opacity-30">|</span> <span className="group-hover:underline underline-offset-4">{t('whats_new')}</span>
             </span>
           </button>
 
@@ -89,12 +89,6 @@ const Welcome: React.FC = () => {
           <p className="max-w-xl mx-auto text-base md:text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12 px-4">
             {t('hero_subtitle')}
           </p>
-
-          {error && (
-            <div className="max-w-md mx-auto mb-8 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-rose-500 animate-shake">
-              <i className="fas fa-exclamation-triangle mr-2"></i> System Error: {error}
-            </div>
-          )}
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
              <button 
@@ -203,7 +197,7 @@ const Welcome: React.FC = () => {
            </div>
         </section>
 
-        {/* VOCAB LAB (SYNCED WITH ARCHITECT) */}
+        {/* VOCAB LAB */}
         <section className="mb-32">
            <div className="bg-emerald-50/40 dark:bg-[#022c22] rounded-[2.5rem] p-8 md:p-16 border border-emerald-100/50 dark:border-white/5 shadow-xl">
               <div className="flex flex-col lg:flex-row gap-12 items-start">
