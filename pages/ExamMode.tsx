@@ -67,8 +67,8 @@ const ExamMode: React.FC = () => {
     try {
       const newPrompt = await generateWritingTopic(taskType);
       setPrompt(newPrompt);
-    } catch (err) {
-      setError(t('error_generic'));
+    } catch (err: any) {
+      setError(err.message || t('error_generic'));
     } finally {
       setIsGeneratingTopic(false);
     }
@@ -84,8 +84,8 @@ const ExamMode: React.FC = () => {
     try {
       const result = await brainstormIdeas(prompt, taskType);
       setBrainstormResult(result);
-    } catch (err) {
-      setError(t('error_ai'));
+    } catch (err: any) {
+      setError(err.message || t('error_ai'));
     } finally {
       setIsBrainstorming(false);
     }
@@ -109,8 +109,8 @@ const ExamMode: React.FC = () => {
       const result = await evaluateEssay({ taskType, prompt, essay });
       localStorage.removeItem(EXAM_STORAGE_KEY);
       navigate('/results', { state: { evaluation: result } });
-    } catch (err) {
-      setError(t('error_eval'));
+    } catch (err: any) {
+      setError(err.message || t('error_eval'));
       setIsEvaluating(false);
     }
   };
@@ -163,7 +163,7 @@ const ExamMode: React.FC = () => {
       {error && (
         <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-slideUp">
           <i className="fas fa-exclamation-circle"></i>
-          {error}
+          <span className="break-words">{error}</span>
         </div>
       )}
 

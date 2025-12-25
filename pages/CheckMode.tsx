@@ -62,8 +62,8 @@ const CheckMode: React.FC = () => {
       const result = await evaluateEssay({ taskType, prompt, essay });
       localStorage.removeItem(CHECK_STORAGE_KEY);
       navigate('/results', { state: { evaluation: result } });
-    } catch (err) {
-      setError("AI Evaluation service failed.");
+    } catch (err: any) {
+      setError(err.message || "AI Evaluation service failed.");
       setIsEvaluating(false);
     }
   };
@@ -78,8 +78,8 @@ const CheckMode: React.FC = () => {
     try {
       const result = await brainstormIdeas(prompt, taskType);
       setBrainstormResult(result);
-    } catch (err) {
-      setError("Brainstorming failed.");
+    } catch (err: any) {
+      setError(err.message || "Brainstorming failed.");
     } finally {
       setIsBrainstorming(false);
     }
@@ -91,8 +91,8 @@ const CheckMode: React.FC = () => {
     try {
       const newPrompt = await generateWritingTopic(taskType);
       setGeneratedTopic(newPrompt);
-    } catch (err) {
-      setError("Failed to generate a topic.");
+    } catch (err: any) {
+      setError(err.message || "Failed to generate a topic.");
     } finally {
       setIsGeneratingTopic(false);
     }
@@ -113,8 +113,8 @@ const CheckMode: React.FC = () => {
     try {
       const feedback = await quickScanEssay(essay);
       setQuickFeedback(feedback);
-    } catch (err) {
-      setError("Quick scan unavailable.");
+    } catch (err: any) {
+      setError(err.message || "Quick scan unavailable.");
     } finally {
       setIsEvaluating(false);
     }
@@ -140,7 +140,7 @@ const CheckMode: React.FC = () => {
       {error && (
         <div className="mb-6 md:mb-8 p-4 md:p-5 bg-rose-50 dark:bg-rose-900/40 border border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-200 rounded-2xl md:rounded-[2rem] text-[10px] md:text-xs font-black uppercase tracking-widest flex items-center gap-3 animate-shake">
           <i className="fas fa-exclamation-triangle text-base md:text-lg text-rose-500"></i>
-          {error}
+          <span className="break-words">{error}</span>
         </div>
       )}
 
