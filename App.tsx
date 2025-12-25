@@ -10,7 +10,6 @@ import FAQPage from './pages/FAQPage';
 import ContactPage from './pages/ContactPage';
 import { LanguageProvider } from './context/LanguageContext';
 
-
 const App: React.FC = () => {
   return (
     <LanguageProvider>
@@ -25,11 +24,9 @@ const App: React.FC = () => {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-
         </Layout>
       </HashRouter>
     </LanguageProvider>
-    
   );
 };
 

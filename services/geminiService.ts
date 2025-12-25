@@ -11,19 +11,11 @@ const cleanJson = (text: string): string => {
   }
 };
 
-/**
- * Creates a fresh AI instance. 
- * Per guidelines, we must create a new instance right before the call 
- * to ensure we use the latest injected process.env.API_KEY.
- */
 const getAIInstance = () => {
   const apiKey = process.env.API_KEY;
-  
-  // Checking for common "missing key" strings that might come from bundlers or environments
-  if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey.length < 10) {
-    throw new Error("API_KEY_MISSING");
+  if (!apiKey || apiKey === "undefined" || apiKey.length < 5) {
+    throw new Error("CRITICAL: API_KEY is not configured in environment variables. Please add it to your project settings.");
   }
-  
   return new GoogleGenAI({ apiKey });
 };
 
@@ -35,8 +27,7 @@ export const evaluateEssay = async (submission: WritingSubmission): Promise<IELT
     OFFICIAL PROMPT: ${submission.prompt}
     STUDENT ESSAY: ${submission.essay}
     
-    Criteria: Task Response, Cohesion, Lexical Resource, Grammar.
-    Return JSON format only with fields: overallBand, taskResponse, coherenceCohesion, lexicalResource, grammaticalRange, detailedAnalysis, improvedVersion, wordCount.`;
+    Strictly apply IELTS assessment criteria. Return result in JSON format only.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
@@ -49,124 +40,64 @@ export const evaluateEssay = async (submission: WritingSubmission): Promise<IELT
     });
 
     const text = response.text;
-    if (!text) throw new Error("EMPTY_RESPONSE");
+    if (!text) throw new Error("AI returned an empty response.");
     
     return JSON.parse(cleanJson(text)) as IELTSEvaluation;
   } catch (error: any) {
-    if (error.message === "API_KEY_MISSING") throw error;
-    if (error.message?.includes("API key not valid")) throw new Error("API_KEY_INVALID");
-    
-    console.error("Gemini API Error:", error);
-    throw new Error(error.message || "EVALUATION_FAILED");
-  }
-};
-
-// Fix: Added missing quickScanEssay function
-export const quickScanEssay = async (essay: string): Promise<string> => {
-  try {
-    const ai = getAIInstance();
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `Quickly review this IELTS essay and provide a one-sentence high-level feedback: "${essay}"`,
-    });
-    return response.text || "Scan failed.";
-  } catch (err) {
-    console.error("Quick Scan Error:", err);
-    throw err;
-  }
-};
-
-// Fix: Added missing getAudioFeedback function using the dedicated TTS model
-export const getAudioFeedback = async (text: string): Promise<string> => {
-  try {
-    const ai = getAIInstance();
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: `Say in a professional examiner voice: ${text}` }] }],
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' },
-          },
-        },
-      },
-    });
-    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) throw new Error("No audio feedback generated");
-    return base64Audio;
-  } catch (err) {
-    console.error("Audio Feedback Error:", err);
-    throw err;
-  }
-};
-
-// Fix: Added missing chatWithExaminer function to enable interaction with the results
-export const chatWithExaminer = async (history: any[], message: string): Promise<string> => {
-  try {
-    const ai = getAIInstance();
-    const chat = ai.chats.create({
-      model: 'gemini-3-flash-preview',
-      config: {
-        systemInstruction: 'You are an IELTS examiner assisting a student with their writing feedback. Be academic, precise, and encouraging.',
-      }
-    });
-    const response = await chat.sendMessage({ message });
-    return response.text || "I am unable to formulate a response at this moment.";
-  } catch (err) {
-    console.error("Examiner Chat Error:", err);
-    throw err;
+    console.error("Evaluation Error:", error);
+    throw new Error(error.message || "Evaluation failed due to an internal AI error.");
   }
 };
 
 export const transmuteVocabulary = async (word: string): Promise<{ band7: string; band8: string; band9: string }> => {
-  try {
-    const ai = getAIInstance();
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `Provide 3 academic synonyms for "${word}" at IELTS Band 7, 8, and 9 levels. Return as JSON.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            band7: { type: Type.STRING },
-            band8: { type: Type.STRING },
-            band9: { type: Type.STRING }
-          },
-          required: ["band7", "band8", "band9"]
-        }
+  const ai = getAIInstance();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Provide 3 academic synonyms for "${word}" at IELTS Band 7, 8, and 9 levels. Return as JSON.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          band7: { type: Type.STRING },
+          band8: { type: Type.STRING },
+          band9: { type: Type.STRING }
+        },
+        required: ["band7", "band8", "band9"]
       }
-    });
-    return JSON.parse(cleanJson(response.text || "{}"));
-  } catch (err: any) {
-    throw err;
-  }
+    }
+  });
+  return JSON.parse(cleanJson(response.text || "{}"));
 };
 
 export const transformSentence = async (sentence: string): Promise<{ band7: string; band8: string; band9: string }> => {
-  try {
-    const ai = getAIInstance();
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `Rewrite this sentence into academic IELTS structures at Band 7, 8, and 9: "${sentence}". Return as JSON.`,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            band7: { type: Type.STRING },
-            band8: { type: Type.STRING },
-            band9: { type: Type.STRING }
-          },
-          required: ["band7", "band8", "band9"]
-        }
+  const ai = getAIInstance();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Rewrite this sentence into academic IELTS structures at Band 7, 8, and 9: "${sentence}". Return as JSON.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          band7: { type: Type.STRING },
+          band8: { type: Type.STRING },
+          band9: { type: Type.STRING }
+        },
+        required: ["band7", "band8", "band9"]
       }
-    });
-    return JSON.parse(cleanJson(response.text || "{}"));
-  } catch (err: any) {
-    throw err;
-  }
+    }
+  });
+  return JSON.parse(cleanJson(response.text || "{}"));
+};
+
+export const quickScanEssay = async (essay: string): Promise<string> => {
+  const ai = getAIInstance();
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Perform a quick academic scan of this IELTS essay. Focus on identifying major grammar issues. Keep feedback brief. ESSAY: ${essay}`,
+  });
+  return response.text?.trim() || "No feedback available.";
 };
 
 export const generateWritingTopic = async (type: TaskType): Promise<string> => {
@@ -186,4 +117,27 @@ export const brainstormIdeas = async (promptText: string, taskType: TaskType) =>
     config: { responseMimeType: "application/json" }
   });
   return JSON.parse(cleanJson(response.text || "{}"));
+};
+
+export const chatWithExaminer = async (history: any[], newMessage: string) => {
+  const ai = getAIInstance();
+  const chat = ai.chats.create({
+    model: 'gemini-3-flash-preview',
+    config: { systemInstruction: 'You are a helpful IELTS tutor. Keep answers brief (max 3 sentences).' },
+  });
+  const response = await chat.sendMessage({ message: newMessage });
+  return response.text;
+};
+
+export const getAudioFeedback = async (text: string): Promise<string> => {
+  const ai = getAIInstance();
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash-preview-tts",
+    contents: [{ parts: [{ text: `Feedback summary: ${text.slice(0, 400)}` }] }],
+    config: {
+      responseModalities: [Modality.AUDIO],
+      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
+    },
+  });
+  return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || "";
 };
