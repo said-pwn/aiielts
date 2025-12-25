@@ -226,9 +226,9 @@ const ResultView: React.FC<ResultViewProps> = ({ evaluation, onReset }) => {
           </section>
         </div>
 
-        {/* SIDEBAR: CHAT INTERFACE - Adjusted top to 24 */}
+        {/* SIDEBAR: CHAT INTERFACE - Adjusted top to 20 for better spacing */}
         <div className="lg:col-span-4">
-          <div className="bg-white dark:bg-slate-900/60 p-10 rounded-[3.5rem] border border-slate-100 dark:border-white/5 shadow-2xl sticky top-24">
+          <div className="bg-white dark:bg-slate-900/60 p-10 rounded-[3.5rem] border border-slate-100 dark:border-white/5 shadow-2xl sticky top-20">
              <div className="flex items-center gap-5 mb-10">
                 <div className="w-12 h-12 bg-brand-primary/10 text-brand-primary rounded-2xl flex items-center justify-center text-xl">
                   <i className="fas fa-comments"></i>
