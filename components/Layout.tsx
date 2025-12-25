@@ -219,7 +219,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           </div>
           <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-center text-[9px] font-black uppercase tracking-[0.5em] text-slate-600">
-            <p>© {new Date().getFullYear()} IELTSWRITING.UZ — GLOBAL ACADEMIC EXCELLENCE</p>
+            <p>© {new Date().getFullYear()} IELTSWRITING.UZ — CHECK YOUR IELTS WRITING</p>
           </div>
         </div>
         <div className="h-28 md:hidden"></div>
