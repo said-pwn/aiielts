@@ -75,7 +75,7 @@ const Welcome: React.FC = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
             </span>
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-brand-secondary dark:text-emerald-400">
-              {latestUpdate.version} STABLE <span className="mx-2 opacity-30">|</span> <span className="group-hover:underline underline-offset-4">{t('whats_new')}</span>
+              {latestUpdate.version}  <span className="mx-2 opacity-30">|</span> <span className="group-hover:underline underline-offset-4">{t('whats_new')}</span>
             </span>
           </button>
 

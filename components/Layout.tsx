@@ -192,7 +192,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="text-xl font-black tracking-tighter uppercase">IELTSWRITING<span className="text-brand-primary">.UZ</span></span>
               </Link>
               <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs">
-                Premium AI academic infrastructure developed for Uzbekistan's brightest minds. Real metrics, real feedback, real results.
+                Check your IELTS writing level with ai
               </p>
             </div>
 
